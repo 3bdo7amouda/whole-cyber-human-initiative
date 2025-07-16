@@ -168,64 +168,6 @@
       when: not nginx.default_site and nginx_check.rc != 0
       notify: restart nginx
 
-    - name: Check if UFW is installed
-      command: ufw --version
-      register: ufw_check
-      ignore_errors: true
-      changed_when: false
-
-    - name: Install UFW
-      apt:
-        name: ufw
-        state: present
-      when: ufw_check.rc != 0
-
-    - name: Configure UFW default policies
-      ufw:
-        direction: "{{ ufw.default_policy.direction }}"
-        policy: "{{ ufw.default_policy.policy }}"
-      when: ufw.enabled
-
-    - name: Configure UFW rules
-      ufw:
-        rule: "{{ item.rule }}"
-        port: "{{ item.port }}"
-        proto: "{{ item.proto }}"
-      loop: "{{ ufw.rules }}"
-      when: ufw.enabled
-
-    - name: Enable UFW
-      ufw:
-        state: enabled
-      when: ufw.enabled
-
-    - name: Check if Fail2ban is installed
-      command: fail2ban-client --version
-      register: fail2ban_check
-      ignore_errors: true
-      changed_when: false
-
-    - name: Install Fail2ban
-      apt:
-        name: fail2ban
-        state: present
-      when: fail2ban_check.rc != 0
-
-    - name: Configure Fail2ban jail.local
-      template:
-        src: jail.local.j2
-        dest: /etc/fail2ban/jail.local
-        backup: true
-      notify: restart fail2ban
-      when: fail2ban.enabled and fail2ban_check.rc != 0
-
-    - name: Start and enable Fail2ban service
-      systemd:
-        name: fail2ban
-        state: started
-        enabled: true
-      when: fail2ban.enabled
-
   handlers:
     - name: restart redis
       systemd:
@@ -235,9 +177,4 @@
     - name: restart nginx
       systemd:
         name: nginx
-        state: restarted
-
-    - name: restart fail2ban
-      systemd:
-        name: fail2ban
         state: restarted
