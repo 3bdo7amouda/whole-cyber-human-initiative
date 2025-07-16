@@ -140,6 +140,7 @@
         name: redis-server
         state: started
         enabled: true
+      when: redis_check.rc != 0
 
     - name: Check if Nginx is installed
       command: nginx -v
@@ -158,6 +159,7 @@
         name: nginx
         state: started
         enabled: true
+      when: nginx_check.rc != 0
 
     - name: Remove default Nginx site
       file:
