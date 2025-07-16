@@ -41,39 +41,6 @@ nginx:
   sites_enabled_path: "/etc/nginx/sites-enabled"
   default_site: true
 
-# Security tools
-ufw:
-  enabled: true
-  default_policy:
-    direction: incoming
-    policy: deny
-  rules:
-    - rule: allow
-      port: 22
-      proto: tcp
-    - rule: allow
-      port: 80
-      proto: tcp
-    - rule: allow
-      port: 443
-      proto: tcp
-
-fail2ban:
-  enabled: true
-  jail_local_config:
-    - section: "DEFAULT"
-      options:
-        bantime: "10m"
-        findtime: "10m"
-        maxretry: 5
-    - section: "sshd"
-      options:
-        enabled: true
-        port: "ssh"
-        filter: "sshd"
-        logpath: "/var/log/auth.log"
-        maxretry: 3
-
 # Ansible configuration
 ansible:
   version: "latest"
