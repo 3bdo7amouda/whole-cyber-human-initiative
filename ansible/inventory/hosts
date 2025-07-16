@@ -1,0 +1,10 @@
+[webservers]
+localhost ansible_connection=local
+
+[databases]
+localhost ansible_connection=local
+
+[all:vars]
+ansible_user=abdel
+ansible_become=yes
+ansible_become_method=sudo
