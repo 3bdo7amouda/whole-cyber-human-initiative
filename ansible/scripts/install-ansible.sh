@@ -31,13 +31,25 @@ if [[ $EUID -eq 0 ]]; then
    exit 1
 fi
 
+# Detect OS
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    OS=$NAME
+    VER=$VERSION_ID
+else
+    print_error "Cannot detect OS version"
+    exit 1
+fi
+
+print_status "Detected OS: $OS"
+
 # Update system packages
 print_status "Updating system packages..."
 sudo apt update
 
 # Install required packages
 print_status "Installing required packages..."
-sudo apt install -y software-properties-common
+sudo apt install -y software-properties-common python3-pip
 
 # Check if Ansible is already installed
 if command -v ansible &> /dev/null; then
@@ -51,13 +63,21 @@ if command -v ansible &> /dev/null; then
     fi
 fi
 
-# Add Ansible PPA
-print_status "Adding Ansible PPA..."
-sudo add-apt-repository --yes --update ppa:ansible/ansible
-
-# Install Ansible
-print_status "Installing Ansible..."
-sudo apt install -y ansible
+# Install Ansible based on OS
+if [[ "$OS" == *"Ubuntu"* ]]; then
+    print_status "Installing Ansible on Ubuntu..."
+    sudo add-apt-repository --yes --update ppa:ansible/ansible
+    sudo apt install -y ansible
+elif [[ "$OS" == *"Debian"* ]]; then
+    print_status "Installing Ansible on Debian..."
+    # For Debian, we'll use pip3 to install Ansible
+    sudo apt install -y python3-pip python3-venv
+    print_status "Installing Ansible via pip3..."
+    sudo pip3 install ansible
+else
+    print_status "Installing Ansible via pip3 (generic method)..."
+    sudo pip3 install ansible
+fi
 
 # Verify installation
 print_status "Verifying Ansible installation..."
@@ -68,6 +88,10 @@ else
     print_error "Ansible installation failed"
     exit 1
 fi
+
+# Install additional Python packages needed for the playbook
+print_status "Installing additional Python packages..."
+sudo pip3 install psycopg2-binary
 
 # Create ansible.cfg in user's home directory
 print_status "Creating Ansible configuration file..."
