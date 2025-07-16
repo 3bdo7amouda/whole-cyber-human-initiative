@@ -1,0 +1,80 @@
+---
+# Software versions and configurations
+# Update these versions as needed for your environment
+
+# System packages
+system_packages:
+  - curl
+  - wget
+  - gnupg
+  - lsb-release
+  - ca-certificates
+  - software-properties-common
+  - apt-transport-https
+
+# Docker configuration
+docker:
+  version: "latest"  # or specify version like "5:20.10.21~3-0~ubuntu-jammy"
+  compose_version: "2.23.0"
+  users:
+    - "{{ ansible_user }}"
+
+# Database configurations
+postgresql:
+  version: "15"
+  port: 5432
+  databases:
+    - name: "app_db"
+      user: "app_user"
+      password: "{{ vault_postgres_password | default('changeme') }}"
+
+redis:
+  version: "7"
+  port: 6379
+  maxmemory: "256mb"
+  maxmemory_policy: "allkeys-lru"
+
+# Web server configuration
+nginx:
+  version: "latest"
+  sites_available_path: "/etc/nginx/sites-available"
+  sites_enabled_path: "/etc/nginx/sites-enabled"
+  default_site: true
+
+# Security tools
+ufw:
+  enabled: true
+  default_policy:
+    direction: incoming
+    policy: deny
+  rules:
+    - rule: allow
+      port: 22
+      proto: tcp
+    - rule: allow
+      port: 80
+      proto: tcp
+    - rule: allow
+      port: 443
+      proto: tcp
+
+fail2ban:
+  enabled: true
+  jail_local_config:
+    - section: "DEFAULT"
+      options:
+        bantime: "10m"
+        findtime: "10m"
+        maxretry: 5
+    - section: "sshd"
+      options:
+        enabled: true
+        port: "ssh"
+        filter: "sshd"
+        logpath: "/var/log/auth.log"
+        maxretry: 3
+
+# Ansible configuration
+ansible:
+  version: "latest"
+  config_file: "~/.ansible.cfg"
