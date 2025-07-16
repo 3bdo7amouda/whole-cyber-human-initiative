@@ -26,13 +26,13 @@
 
     - name: Add Docker GPG key
       apt_key:
-        url: https://download.docker.com/linux/ubuntu/gpg
+        url: https://download.docker.com/linux/debian/gpg
         state: present
       when: docker_check.rc != 0
 
     - name: Add Docker repository
       apt_repository:
-        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        repo: "deb [arch=amd64] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable"
         state: present
       when: docker_check.rc != 0
 
@@ -90,6 +90,7 @@
         name: postgresql
         state: started
         enabled: true
+      when: postgres_check.rc != 0
 
     - name: Create PostgreSQL databases
       postgresql_db:
